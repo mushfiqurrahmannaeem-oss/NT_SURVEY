@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - NT SURVEY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #f9f9f9; padding-bottom: 80px; }
+        .header { background: #fff; padding: 25px; text-align: center; border-bottom: 2px solid #eee; }
+        .coin-box { font-size: 30px; font-weight: bold; color: #333; margin-top: 5px; }
+        .form-container { padding: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-withdraw { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
+        .nav-item { text-align: center; text-decoration: none; color: #666; font-size: 12px; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <p style="margin:0; color:#888;">Available Balance</p>
+        <div class="coin-box"><i class="fas fa-coins" style="color:#f1c40f;"></i> <span id="coins">0</span></div>
+    </div>
+
+    <div class="form-container">
+        <div class="input-group">
+            <label>Select Payment Method</label>
+            <select id="wd_method" onchange="updatePlaceholder()">
+                <option value="Bkash">Bkash</option>
+                <option value="USD">USD (Binance/USDT)</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label id="account_label">Bkash Number</label>
+            <input type="text" id="wd_account" placeholder="Enter your Bkash number">
+        </div>
+
+        <div class="input-group">
+            <label>Withdraw Amount (Min: 500)</label>
+            <input type="number" id="wd_coins" placeholder="Enter coins">
+        </div>
+
+        <button class="btn-withdraw" onclick="requestWithdraw()">Submit Request</button>
+    </div>
+
+    <nav class="nav-bar">
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="withdraw.html" class="nav-item" style="color:#000;"><i class="fas fa-wallet"></i>Withdraw</a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="withdraw.js"></script>
+
+    <script>
+        // Method change korle text change hobe
+        function updatePlaceholder() {
+            const method = document.getElementById("wd_method").value;
+            const label = document.getElementById("account_label");
+            const input = document.getElementById("wd_account");
+
+            if (method === "Bkash") {
+                label.innerText = "Bkash Number";
+                input.placeholder = "Enter your Bkash number";
+            } else {
+                label.innerText = "USD Address";
+                input.placeholder = "Enter USDT (TRC20) or Binance Address";
+            }
+        }
+    </script>
+    
+    <footer style="text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #ddd;">
+    <p>&copy; 2023 My Survey Platform. All Rights Reserved.</p>
+    <a href="policy.html" style="color: #666; text-decoration: none; margin: 0 10px;">Privacy Policy</a> | 
+    <a href="contact.html" style="color: #666; text-decoration: none; margin: 0 10px;">Contact Us</a>
+    </footer>
+    </div>
+
+</body>
+</html>

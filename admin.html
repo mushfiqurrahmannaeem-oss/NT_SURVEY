@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Panel - NT Survey</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      /* আপনার দেওয়া অরিজিনাল স্ক্রল সেটিংস (যা আমি আর স্পর্শ করিনি) */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh; 
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    background-color: #f4f4f4;
+    font-family: sans-serif;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    height: auto; 
+    box-sizing: border-box;
+}
+
+.admin-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+        .admin-card h2, .admin-card h3 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+
+        .admin-input-group input {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .admin-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        #adminSurveyList, #pendingList { margin-top: 15px; }
+        hr { margin: 30px 0; border: 0; border-top: 1px solid #eee; }
+        
+@keyframes blinkBorder {
+    0% { border-color: #ffc107; box-shadow: 0 0 2px #ffc107; }
+    50% { border-color: #d35400; box-shadow: 0 0 10px rgba(211, 84, 0, 0.5); }
+    100% { border-color: #ffc107; box-shadow: 0 0 2px #ffc107; }
+}
+
+.survey-desc {
+    background: #fffbe6 !important;
+    border: 2px dashed #ffc107 !important;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    animation: blinkBorder 2s infinite;
+    transition: all 0.3s ease;
+}
+
+.survey-desc::before {
+    content: "⚠️ READ CAREFULLY:";
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    color: #b71c1c;
+    margin-bottom: 5px;
+}
+        
+.survey-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+}
+
+.survey-info p {
+    font-size: 13px;
+    color: #666;
+    margin: 8px 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div id="loginSection" class="admin-card">
+        <h2>Admin Access</h2>
+        <div class="admin-input-group">
+            <input type="email" id="adminEmail" placeholder="Enter Admin Email">
+            <input type="password" id="adminPassword" placeholder="Enter Admin Password">
+        </div>
+        <button class="admin-btn" onclick="adminLogin()">Login as Admin</button>
+    </div>
+
+    <div id="adminDashboard" class="admin-card" style="display:none;">
+        <h3>Create New Survey</h3>
+        <p style="font-size: 12px; color: #666; text-align: center; margin-bottom: 15px;">Note: Timer has been removed. Coins will be added instantly upon click.</p>
+        <div class="admin-input-group">
+            <input type="text" id="surveyTitle" placeholder="Survey Title">
+          <textarea id="surveyDesc" placeholder="Description..." 
+style="width: 100%; height: 100px; max-height: 150px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 16px; overflow-y: auto; resize: none;"></textarea>
+            <input type="number" id="rewardCoins" placeholder="Reward Coins">
+            <input type="text" id="surveyLink" placeholder="Survey Link (Offerwall/Form)">
+        </div>
+        <button class="admin-btn" onclick="publishSurvey()">Publish Survey</button>
+
+        <hr>
+
+        <h3>Published Surveys</h3>
+        <div id="adminSurveyList">Loading surveys...</div>
+
+        <h3 style="margin-top: 30px;">Withdrawal Requests</h3>
+        <div id="pendingList">No pending requests.</div> 
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; padding-bottom: 20px;">
+        <hr style="border: 0; border-top: 1px solid #ddd; width: 100%; margin-bottom: 15px;">
+        <p style="font-size: 13px; color: #666;">&copy; 2025 NT Survey Platform. All Rights Reserved.</p>
+        <div style="font-size: 14px; font-weight: bold;">
+            <a href="about.html" style="text-decoration: none; color: #00796b;">About Us</a> | 
+            <a href="contact.html" style="text-decoration: none; color: #00796b;">Contact Us</a> | 
+            <a href="policy.html" style="text-decoration: none; color: #00796b;">Privacy Policy</a>
+        </div>
+    </div>
+</div> <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

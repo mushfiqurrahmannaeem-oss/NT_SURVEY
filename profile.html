@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - NT SURVEY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding-bottom: 80px; }
+        .profile-card { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 30px 20px; text-align: center; }
+        .user-icon { font-size: 50px; background: rgba(255,255,255,0.2); width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 10px; }
+        
+        .section-title { padding: 15px 20px 5px; font-weight: bold; color: #2c3e50; font-size: 14px; }
+        .info-box { background: white; margin: 10px 20px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        .refer-code { border: 2px dashed #2c3e50; padding: 10px; display: inline-block; font-weight: bold; letter-spacing: 2px; margin-top: 10px; width: 100%; box-sizing: border-box; text-align: center; }
+        
+        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .status { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .status.approved { background: #d4edda; color: #155724; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .status.rejected { background: #f8d7da; color: #721c24; }
+
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .nav-item { text-align: center; text-decoration: none; color: #7f8c8d; font-size: 12px; }
+        .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; }
+        .nav-item.active { color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <div class="user-icon"><i class="fas fa-user"></i></div>
+        <h4 id="userEmail" style="margin:5px 0;">Loading...</h4>
+        <p id="userUID" style="font-size:11px; opacity: 0.7;"></p>
+    </div>
+
+    <div class="section-title">REFERRAL PROGRAM</div>
+    <div class="info-box">
+        <p style="font-size:12px; margin:0;">Share your code and earn 10% bonus!</p>
+        <div class="refer-code" id="refCode">......</div>
+        <button onclick="copyRef()" style="width:100%; margin-top:10px; background:#2c3e50; color:white; border:none; padding:8px; border-radius:5px;">Copy Code</button>
+    </div>
+
+    <div class="section-title">WITHDRAW HISTORY</div>
+    <div class="info-box" id="withdrawHistory">
+        <p style="text-align:center; color:#999; font-size:12px;">No records found.</p>
+    </div>
+
+    <div class="section-title">COMPLETED TASKS</div>
+    <div class="info-box" id="taskHistory">
+        <p style="text-align:center; color:#999; font-size:12px;">No tasks completed yet.</p>
+    </div>
+
+    <button onclick="logout()" style="display:block; margin:20px auto; color:#e74c3c; background:none; border:none; font-weight:bold;">Logout Account</button>
+
+    <nav class="nav-bar">
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i>Profile</a>
+        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+
+    <script>
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("userEmail").innerText = user.email;
+                document.getElementById("userUID").innerText = "ID: " + user.uid.substring(0,10) + "...";
+                document.getElementById("refCode").innerText = user.uid.substring(0,6).toUpperCase();
+                
+                loadWithdraws(user.uid);
+                loadTaskHistory(user.uid);
+            } else { window.location.href = "index.html"; }
+        });
+
+        function loadWithdraws(uid) {
+            const container = document.getElementById("withdrawHistory");
+            firebase.database().ref("withdraws").orderByChild("uid").equalTo(uid).on("value", (snap) => {
+                if(snap.exists()) {
+                    container.innerHTML = "";
+                    snap.forEach(child => {
+                        const data = child.val();
+                        container.innerHTML += `
+                            <div class="history-item">
+                                <span>$${data.amount} (${data.method})</span>
+                                <span class="status ${data.status.toLowerCase()}">${data.status}</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
+        }
+
+        function loadTaskHistory(uid) {
+            const container = document.getElementById("taskHistory");
+            firebase.database().ref("users/" + uid + "/task_history").on("value", (snap) => {
+                if(snap.exists()) {
+                    container.innerHTML = "";
+                    snap.forEach(child => {
+                        const data = child.val();
+                        container.innerHTML += `
+                            <div class="history-item">
+                                <span>Task Complete</span>
+                                <span style="color:#27ae60;">+${data.points} Coins</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
+        }
+
+        function copyRef() {
+            navigator.clipboard.writeText(document.getElementById("refCode").innerText);
+            alert("Referral Code Copied!");
+        }
+
+        function logout() {
+            firebase.auth().signOut().then(() => window.location.href="index.html");
+        }
+    </script>
+</body>
+</html>
